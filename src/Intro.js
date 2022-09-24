@@ -7,6 +7,8 @@ class Intro extends Phaser.Scene {
     preload() {
         this.load.image('intro', '../assets/intro.jpg');
         this.load.image('title', '../assets/start.png');
+        this.load.image('shuffle', '../assets/shuffle-button-flat-icon.png');
+        
     }
 
     create() {

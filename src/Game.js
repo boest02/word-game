@@ -21,18 +21,18 @@ class Game extends Phaser.Scene {
         this.playBackText = '';
 
         let answerRow = {
-            word: 'TESTER', // word for user
+            word: 'FADE', // word for user
             boxes: [], // boxes for letters
             line: {} // position for boxes
         };
 
         let answerRow2 = {
-            word: 'TEST', // word for user
+            word: 'FACE', // word for user
             boxes: [], // boxes for letters
             line: {} // position for boxes
         };
         let answerRow3 = {
-            word: 'TES', // word for user
+            word: 'ACE', // word for user
             boxes: [], // boxes for letters
             line: {} // position for boxes
         };
@@ -53,6 +53,15 @@ class Game extends Phaser.Scene {
         // scene background
         let background = this.add.sprite(0, 0, 'intro');
         background.setOrigin(0, 0);
+        
+        let suffleButton = this.add.sprite(this.screenCenterH+170, 375, 'shuffle')
+                                   .setScale(.18)
+                                   .setInteractive();
+                                   
+        suffleButton.on('pointerdown', (pointer) => {
+            this.shuffleArray(this.letters);
+            this.redraw();
+        });
         
         // scene letter area circle
         let letterAreaRadius = 175;
@@ -126,6 +135,35 @@ class Game extends Phaser.Scene {
                             this.activeLine.end.y);
         }        
     }
+    
+    shuffleArray(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+    
+    matchWord() {
+        let activeWord = this.playBackText.getData('word');
+        let matchWord = this.rows.find((item) => item.word === activeWord);
+        if(matchWord != undefined) {
+            this.writeWord(matchWord.word, matchWord.boxes);
+        }
+    }
+    
+    writeWord(word, boxes) {
+        console.log({word, boxes});
+        boxes.forEach((box, i) => {
+            console.log({x: box.x, y: box.y, letter: word[i]});
+            this.add.text(box.x+6, box.y-1, word[i], {font: "50px Arial"})
+                           .setColor("#ffffff")
+                           .setShadow(5, 5, 'rgba(0,0,0,0.5)', 5)
+                           .setOrigin(0, 0)
+                           .setPadding(5);            
+        });        
+    }
 
     addRows() {
 
@@ -146,21 +184,15 @@ class Game extends Phaser.Scene {
         
         rows.forEach((row) => {
             let firstPosition = this.screenCenterH - columnWidth * (row.word.length/2);
-            console.log("Starting Position: ", firstPosition);
+            
             [...row.word].forEach((letter, i) => {
                 this.graphics.strokeRoundedRect(firstPosition, rowPosition, 60, 60, rounded)
-                             .fillRoundedRect(firstPosition, rowPosition, 60, 60, rounded);                
+                             .fillRoundedRect(firstPosition, rowPosition, 60, 60, rounded); 
+                row.boxes[i] = {x: firstPosition, y: rowPosition};
                 firstPosition += columnWidth;
             });            
             rowPosition += 70;
         });
-
-        console.log("Rows:", rows);
-
-        
-
-        
-        
     }
 
     //
@@ -205,7 +237,8 @@ class Game extends Phaser.Scene {
         this.selectedCircles.forEach((circle) => {
             content += this.findText(circle).getData('letter');            
         });       
-        this.playBackText.setText(content);                       
+        this.playBackText.setText(content);  
+        this.playBackText.setData({word: content});                     
     }
 
     //
@@ -362,6 +395,7 @@ class Game extends Phaser.Scene {
             if(this.activeCircle) {
 
                 /// TODO: check if word match here...
+                this.matchWord()
 
                 this.resetAll();
                 this.redraw();
